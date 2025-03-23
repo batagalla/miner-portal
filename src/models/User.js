@@ -24,8 +24,15 @@ const UserSchema = new mongoose.Schema({
   verificationToken: {
     type: String
   },
-  referralCode: {
+  resetPasswordToken: {
     type: String
+  },
+  resetPasswordExpires: {
+    type: Date
+  },
+  referralCode: {
+    type: String,
+    unique: true
   },
   referredBy: {
     type: mongoose.Schema.Types.ObjectId,

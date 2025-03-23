@@ -16,6 +16,8 @@ import Faq from "./pages/Faq";
 import Contact from "./pages/Contact";
 import Settings from "./pages/Settings";
 import NotFound from "./pages/NotFound";
+import VerifyEmail from "./pages/auth/VerifyEmail";
+import ResetPassword from "./pages/auth/ResetPassword";
 
 // Admin Pages
 import AdminLogin from "./pages/admin/AdminLogin";
@@ -27,6 +29,7 @@ export const AuthContext = createContext({
   login: (token: string, email: string) => {},
   logout: () => {},
   email: "",
+  token: "",
 });
 
 const queryClient = new QueryClient();
@@ -34,14 +37,16 @@ const queryClient = new QueryClient();
 const App = () => {
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [email, setEmail] = useState("");
+  const [token, setToken] = useState("");
   
   // Check for existing token in localStorage on startup
   useEffect(() => {
-    const token = localStorage.getItem("token");
+    const storedToken = localStorage.getItem("token");
     const storedEmail = localStorage.getItem("userEmail");
-    if (token && storedEmail) {
+    if (storedToken && storedEmail) {
       setIsAuthenticated(true);
       setEmail(storedEmail);
+      setToken(storedToken);
     }
   }, []);
   
@@ -50,6 +55,7 @@ const App = () => {
     localStorage.setItem("userEmail", email);
     setIsAuthenticated(true);
     setEmail(email);
+    setToken(token);
   };
   
   const logout = () => {
@@ -57,6 +63,7 @@ const App = () => {
     localStorage.removeItem("userEmail");
     setIsAuthenticated(false);
     setEmail("");
+    setToken("");
   };
   
   // Protected route component
@@ -76,7 +83,7 @@ const App = () => {
   };
 
   return (
-    <AuthContext.Provider value={{ isAuthenticated, login, logout, email }}>
+    <AuthContext.Provider value={{ isAuthenticated, login, logout, email, token }}>
       <QueryClientProvider client={queryClient}>
         <TooltipProvider>
           <Toaster />
@@ -92,6 +99,10 @@ const App = () => {
                   </PublicOnlyRoute>
                 } 
               />
+              
+              {/* Auth related routes */}
+              <Route path="/verify-email/:token" element={<VerifyEmail />} />
+              <Route path="/reset-password/:token" element={<ResetPassword />} />
               
               {/* Mixed access routes - different views for auth/non-auth */}
               <Route 

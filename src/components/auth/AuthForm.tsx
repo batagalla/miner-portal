@@ -1,4 +1,5 @@
-import { useState, useContext } from "react";
+
+import { useState, useContext, useEffect } from "react";
 import { z } from "zod";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -15,7 +16,23 @@ import { Input } from "@/components/ui/input";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { toast } from "@/components/ui/use-toast";
 import { AuthContext } from "../../App";
-import { Mail, Lock, User, Loader2 } from "lucide-react";
+import { Mail, Lock, User, Loader2, ArrowLeft } from "lucide-react";
+import AdsComponent from "../ads/AdsComponent";
+import { useIsMobile } from "@/hooks/use-mobile";
+
+declare global {
+  interface Window {
+    google?: {
+      accounts: {
+        id: {
+          initialize: (config: any) => void;
+          renderButton: (element: HTMLElement, config: any) => void;
+          prompt: () => void;
+        };
+      };
+    };
+  }
+}
 
 const loginSchema = z.object({
   email: z.string().email({ message: "Please enter a valid email address" }),
@@ -32,13 +49,39 @@ const registerSchema = z.object({
   path: ["confirmPassword"],
 });
 
+const forgotPasswordSchema = z.object({
+  email: z.string().email({ message: "Please enter a valid email address" }),
+});
+
 export type LoginFormValues = z.infer<typeof loginSchema>;
 export type RegisterFormValues = z.infer<typeof registerSchema>;
+export type ForgotPasswordFormValues = z.infer<typeof forgotPasswordSchema>;
 
 const AuthForm = () => {
   const [isLoading, setIsLoading] = useState(false);
   const [activeTab, setActiveTab] = useState("login");
+  const [showForgotPassword, setShowForgotPassword] = useState(false);
   const { login } = useContext(AuthContext);
+  const isMobile = useIsMobile();
+
+  useEffect(() => {
+    // Initialize Google Sign-In
+    if (window.google?.accounts) {
+      window.google.accounts.id.initialize({
+        client_id: '123456789012-abcdefghijklmnopqrstuvwxyz.apps.googleusercontent.com', // Replace with your actual Google client ID
+        callback: handleGoogleCredentialResponse,
+      });
+      
+      const googleButtonElement = document.getElementById('google-button');
+      if (googleButtonElement) {
+        window.google.accounts.id.renderButton(googleButtonElement, {
+          theme: 'outline',
+          size: 'large',
+          width: '100%',
+        });
+      }
+    }
+  }, [activeTab, showForgotPassword]);
 
   const loginForm = useForm<LoginFormValues>({
     resolver: zodResolver(loginSchema),
@@ -58,14 +101,32 @@ const AuthForm = () => {
     },
   });
 
+  const forgotPasswordForm = useForm<ForgotPasswordFormValues>({
+    resolver: zodResolver(forgotPasswordSchema),
+    defaultValues: {
+      email: "",
+    },
+  });
+
   const onLoginSubmit = async (data: LoginFormValues) => {
     setIsLoading(true);
     try {
-      await new Promise(resolve => setTimeout(resolve, 1500));
+      // In a real app, this would be an API call
+      const response = await fetch('http://localhost:5000/api/auth/login', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(data),
+      });
       
-      const fakeToken = "fake-jwt-token-" + Math.random().toString(36).substring(2);
+      const responseData = await response.json();
       
-      login(fakeToken, data.email);
+      if (!response.ok) {
+        throw new Error(responseData.errors?.[0]?.msg || 'Login failed');
+      }
+      
+      login(responseData.token, data.email);
       
       toast({
         title: "Login successful",
@@ -74,7 +135,7 @@ const AuthForm = () => {
     } catch (error) {
       toast({
         title: "Login failed",
-        description: "Please check your credentials and try again.",
+        description: error instanceof Error ? error.message : "Please check your credentials and try again.",
         variant: "destructive",
       });
     } finally {
@@ -85,20 +146,35 @@ const AuthForm = () => {
   const onRegisterSubmit = async (data: RegisterFormValues) => {
     setIsLoading(true);
     try {
-      await new Promise(resolve => setTimeout(resolve, 1500));
+      // In a real app, this would be an API call
+      const response = await fetch('http://localhost:5000/api/auth/register', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          name: data.name,
+          email: data.email,
+          password: data.password,
+        }),
+      });
       
-      const fakeToken = "fake-jwt-token-" + Math.random().toString(36).substring(2);
+      const responseData = await response.json();
       
-      login(fakeToken, data.email);
+      if (!response.ok) {
+        throw new Error(responseData.errors?.[0]?.msg || 'Registration failed');
+      }
+      
+      login(responseData.token, data.email);
       
       toast({
         title: "Registration successful",
-        description: "Welcome to CryptoTab!",
+        description: "Please check your email to verify your account.",
       });
     } catch (error) {
       toast({
         title: "Registration failed",
-        description: "Please try again later.",
+        description: error instanceof Error ? error.message : "Please try again later.",
         variant: "destructive",
       });
     } finally {
@@ -106,15 +182,64 @@ const AuthForm = () => {
     }
   };
 
-  const handleGoogleLogin = async () => {
+  const onForgotPasswordSubmit = async (data: ForgotPasswordFormValues) => {
     setIsLoading(true);
     try {
-      await new Promise(resolve => setTimeout(resolve, 1500));
+      // In a real app, this would be an API call
+      const response = await fetch('http://localhost:5000/api/auth/forgot-password', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(data),
+      });
       
-      const fakeToken = "fake-google-token-" + Math.random().toString(36).substring(2);
-      const fakeEmail = "user" + Math.floor(Math.random() * 1000) + "@gmail.com";
+      const responseData = await response.json();
       
-      login(fakeToken, fakeEmail);
+      if (!response.ok) {
+        throw new Error(responseData.errors?.[0]?.msg || 'Failed to send password reset email');
+      }
+      
+      toast({
+        title: "Password reset email sent",
+        description: "Please check your email for instructions to reset your password.",
+      });
+      
+      setShowForgotPassword(false);
+      
+    } catch (error) {
+      toast({
+        title: "Failed to send password reset email",
+        description: error instanceof Error ? error.message : "Please try again later.",
+        variant: "destructive",
+      });
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const handleGoogleCredentialResponse = async (response: any) => {
+    setIsLoading(true);
+    try {
+      // Verify the credential with your backend
+      const result = await fetch('http://localhost:5000/api/auth/google', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          token: response.credential,
+          // Additional Google user data would be extracted from the token
+        }),
+      });
+      
+      const data = await result.json();
+      
+      if (!result.ok) {
+        throw new Error(data.errors?.[0]?.msg || 'Google authentication failed');
+      }
+      
+      login(data.token, data.user.email);
       
       toast({
         title: "Google login successful",
@@ -123,13 +248,88 @@ const AuthForm = () => {
     } catch (error) {
       toast({
         title: "Google login failed",
-        description: "Please try again later.",
+        description: error instanceof Error ? error.message : "Please try again later.",
         variant: "destructive",
       });
     } finally {
       setIsLoading(false);
     }
   };
+
+  if (showForgotPassword) {
+    return (
+      <div className="glass-card w-full max-w-md p-6 mx-auto animate-fade-in relative">
+        <button 
+          onClick={() => setShowForgotPassword(false)} 
+          className="absolute top-6 left-6 text-binance-text/70 hover:text-binance-text transition-colors"
+          aria-label="Back to login"
+        >
+          <ArrowLeft className="h-5 w-5" />
+        </button>
+        
+        <div className="text-center mb-6">
+          <h2 className="text-2xl font-bold mb-2">Reset Password</h2>
+          <p className="text-binance-text/70 text-sm">
+            Enter your email address and we'll send you a link to reset your password.
+          </p>
+        </div>
+        
+        <Form {...forgotPasswordForm}>
+          <form onSubmit={forgotPasswordForm.handleSubmit(onForgotPasswordSubmit)} className="space-y-4">
+            <FormField
+              control={forgotPasswordForm.control}
+              name="email"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Email</FormLabel>
+                  <FormControl>
+                    <div className="relative">
+                      <Mail className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
+                      <Input 
+                        placeholder="your.email@example.com" 
+                        {...field} 
+                        className="pl-10"
+                        disabled={isLoading}
+                      />
+                    </div>
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+            
+            <Button 
+              type="submit" 
+              className="w-full bg-bitcoin hover:bg-bitcoin-light"
+              disabled={isLoading}
+            >
+              {isLoading ? (
+                <>
+                  <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                  Sending reset link...
+                </>
+              ) : (
+                "Send Reset Link"
+              )}
+            </Button>
+          </form>
+        </Form>
+        
+        <div className="flex justify-center mt-4">
+          <button
+            onClick={() => setShowForgotPassword(false)}
+            className="text-sm text-binance-text/70 hover:text-bitcoin transition-colors"
+          >
+            Back to login
+          </button>
+        </div>
+        
+        <div className="mt-6 flex justify-center w-full">
+          <AdsComponent adUnit="123460" size="square" className="max-w-full" />
+        </div>
+      </div>
+    )
+  }
 
   return (
     <div className="glass-card w-full max-w-md p-6 mx-auto animate-fade-in">
@@ -192,12 +392,13 @@ const AuthForm = () => {
                   )}
                 />
                 <div className="flex justify-end">
-                  <a 
-                    href="#" 
+                  <button 
+                    type="button"
+                    onClick={() => setShowForgotPassword(true)}
                     className="text-sm text-binance-text/70 hover:text-bitcoin transition-colors"
                   >
                     Forgot password?
-                  </a>
+                  </button>
                 </div>
                 <Button 
                   type="submit" 
@@ -229,37 +430,7 @@ const AuthForm = () => {
               </div>
               
               <div className="mt-4">
-                <Button 
-                  type="button" 
-                  variant="outline" 
-                  onClick={handleGoogleLogin}
-                  disabled={isLoading}
-                  className="w-full"
-                >
-                  {isLoading ? (
-                    <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                  ) : (
-                    <svg className="mr-2 h-4 w-4" viewBox="0 0 24 24">
-                      <path
-                        d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"
-                        fill="#4285F4"
-                      />
-                      <path
-                        d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"
-                        fill="#34A853"
-                      />
-                      <path
-                        d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z"
-                        fill="#FBBC05"
-                      />
-                      <path
-                        d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z"
-                        fill="#EA4335"
-                      />
-                    </svg>
-                  )}
-                  Google
-                </Button>
+                <div id="google-button" className="w-full"></div>
               </div>
             </div>
           </TabsContent>
@@ -383,37 +554,7 @@ const AuthForm = () => {
               </div>
               
               <div className="mt-4">
-                <Button 
-                  type="button" 
-                  variant="outline" 
-                  onClick={handleGoogleLogin}
-                  disabled={isLoading}
-                  className="w-full"
-                >
-                  {isLoading ? (
-                    <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                  ) : (
-                    <svg className="mr-2 h-4 w-4" viewBox="0 0 24 24">
-                      <path
-                        d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"
-                        fill="#4285F4"
-                      />
-                      <path
-                        d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"
-                        fill="#34A853"
-                      />
-                      <path
-                        d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z"
-                        fill="#FBBC05"
-                      />
-                      <path
-                        d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z"
-                        fill="#EA4335"
-                      />
-                    </svg>
-                  )}
-                  Google
-                </Button>
+                <div id="google-button" className="w-full"></div>
               </div>
             </div>
           </TabsContent>
