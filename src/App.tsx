@@ -17,6 +17,10 @@ import Contact from "./pages/Contact";
 import Settings from "./pages/Settings";
 import NotFound from "./pages/NotFound";
 
+// Admin Pages
+import AdminLogin from "./pages/admin/AdminLogin";
+import AdminDashboard from "./pages/admin/AdminDashboard";
+
 // Create auth context
 export const AuthContext = createContext({
   isAuthenticated: false,
@@ -124,6 +128,10 @@ const App = () => {
                   </ProtectedRoute>
                 } 
               />
+              
+              {/* Admin routes */}
+              <Route path="/admin/login" element={<AdminLogin />} />
+              <Route path="/admin/dashboard" element={<AdminDashboard />} />
               
               {/* Catch all for 404 */}
               <Route path="*" element={<NotFound />} />

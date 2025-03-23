@@ -2,6 +2,7 @@
 const express = require('express');
 const connectDB = require('./config/db');
 const cors = require('cors');
+const path = require('path');
 require('dotenv').config();
 
 const app = express();
@@ -15,6 +16,7 @@ app.use(cors());
 
 // Define Routes
 app.use('/api/auth', require('./api/auth'));
+app.use('/api/admin', require('./api/admin'));
 app.use('/api/affiliate', require('./api/affiliate'));
 app.use('/api/payouts', require('./api/payouts'));
 
