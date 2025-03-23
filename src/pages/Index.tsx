@@ -1,4 +1,3 @@
-
 import { useContext, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { AuthContext } from "../App";
@@ -7,6 +6,7 @@ import Footer from "../components/layout/Footer";
 import AuthForm from "../components/auth/AuthForm";
 import { Bitcoin, Zap, Users, Wallet, Globe } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import AdsComponent from "../components/ads/AdsComponent";
 
 const Index = () => {
   const { isAuthenticated } = useContext(AuthContext);
@@ -23,8 +23,8 @@ const Index = () => {
       <Navbar />
       
       <main className="flex-1">
-        {/* Hero section */}
-        <section className="relative py-20 overflow-hidden">
+        {/* Hero Section */}
+        <section className="py-16 md:py-24 px-4 relative overflow-hidden">
           <div className="absolute inset-0 z-0">
             <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-full h-full max-w-7xl">
               <svg viewBox="0 0 200 200" xmlns="http://www.w3.org/2000/svg" className="opacity-10">
@@ -56,6 +56,13 @@ const Index = () => {
               <div className="animate-fade-in">
                 <AuthForm />
               </div>
+            </div>
+          </div>
+          
+          {/* Add ad below hero section */}
+          <div className="max-w-7xl mx-auto mt-10">
+            <div className="flex justify-center overflow-x-auto w-full scrollbar-hide">
+              <AdsComponent adUnit="123456" size="horizontal" />
             </div>
           </div>
         </section>
@@ -237,6 +244,11 @@ const Index = () => {
             </div>
           </div>
         </section>
+        
+        {/* Add vertical ad to the side */}
+        <div className="fixed right-4 bottom-24 hidden xl:block">
+          <AdsComponent adUnit="123457" size="vertical" />
+        </div>
       </main>
       
       <Footer />

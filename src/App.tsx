@@ -1,3 +1,4 @@
+
 import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
@@ -10,6 +11,7 @@ import Index from "./pages/Index";
 import Dashboard from "./pages/Dashboard";
 import AffiliateProgram from "./pages/AffiliateProgram";
 import Payouts from "./pages/Payouts";
+import PublicPayouts from "./pages/PublicPayouts";
 import Faq from "./pages/Faq";
 import Contact from "./pages/Contact";
 import Settings from "./pages/Settings";
@@ -61,6 +63,14 @@ const App = () => {
     return <>{children}</>;
   };
 
+  // Public route that redirects authenticated users to dashboard
+  const PublicOnlyRoute = ({ children }: { children: React.ReactNode }) => {
+    if (isAuthenticated) {
+      return <Navigate to="/dashboard" />;
+    }
+    return <>{children}</>;
+  };
+
   return (
     <AuthContext.Provider value={{ isAuthenticated, login, logout, email }}>
       <QueryClientProvider client={queryClient}>
@@ -69,7 +79,27 @@ const App = () => {
           <Sonner />
           <BrowserRouter>
             <Routes>
-              <Route path="/" element={<Index />} />
+              {/* Public only routes - redirect to dashboard if authenticated */}
+              <Route 
+                path="/" 
+                element={
+                  <PublicOnlyRoute>
+                    <Index />
+                  </PublicOnlyRoute>
+                } 
+              />
+              
+              {/* Mixed access routes - different views for auth/non-auth */}
+              <Route 
+                path="/payouts" 
+                element={
+                  isAuthenticated ? <Payouts /> : <PublicPayouts />
+                } 
+              />
+              <Route path="/faq" element={<Faq />} />
+              <Route path="/contact" element={<Contact />} />
+              
+              {/* Protected routes - require authentication */}
               <Route 
                 path="/dashboard" 
                 element={
@@ -87,14 +117,6 @@ const App = () => {
                 } 
               />
               <Route 
-                path="/payouts" 
-                element={
-                  <ProtectedRoute>
-                    <Payouts />
-                  </ProtectedRoute>
-                } 
-              />
-              <Route 
                 path="/settings" 
                 element={
                   <ProtectedRoute>
@@ -102,8 +124,8 @@ const App = () => {
                   </ProtectedRoute>
                 } 
               />
-              <Route path="/faq" element={<Faq />} />
-              <Route path="/contact" element={<Contact />} />
+              
+              {/* Catch all for 404 */}
               <Route path="*" element={<NotFound />} />
             </Routes>
           </BrowserRouter>
