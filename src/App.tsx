@@ -1,4 +1,3 @@
-
 import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
@@ -13,6 +12,7 @@ import AffiliateProgram from "./pages/AffiliateProgram";
 import Payouts from "./pages/Payouts";
 import Faq from "./pages/Faq";
 import Contact from "./pages/Contact";
+import Settings from "./pages/Settings";
 import NotFound from "./pages/NotFound";
 
 // Create auth context
@@ -91,6 +91,14 @@ const App = () => {
                 element={
                   <ProtectedRoute>
                     <Payouts />
+                  </ProtectedRoute>
+                } 
+              />
+              <Route 
+                path="/settings" 
+                element={
+                  <ProtectedRoute>
+                    <Settings />
                   </ProtectedRoute>
                 } 
               />

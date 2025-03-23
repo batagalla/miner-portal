@@ -1,4 +1,3 @@
-
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
@@ -35,9 +34,7 @@
 
     --radius: 0.5rem;
   }
-}
 
-@layer base {
   * {
     @apply border-border;
   }
@@ -49,7 +46,6 @@
     background-attachment: fixed;
   }
 
-  /* Custom scrollbar */
   ::-webkit-scrollbar {
     width: 6px;
     height: 6px;
@@ -110,6 +106,43 @@
   .nav-link.active {
     @apply text-bitcoin after:w-full;
   }
+  
+  .pulse-dot {
+    @apply relative flex h-3 w-3;
+  }
+  
+  .pulse-dot span {
+    @apply animate-ping absolute inline-flex h-full w-full rounded-full bg-bitcoin opacity-75;
+  }
+  
+  .pulse-dot span:last-child {
+    @apply relative inline-flex rounded-full h-3 w-3 bg-bitcoin;
+  }
+  
+  .hover-card {
+    @apply transition-all duration-300 hover:translate-y-[-4px] hover:shadow-lg;
+  }
+  
+  .bitcoin-gradient-bg {
+    background: linear-gradient(135deg, #f7931a 0%, #ff9f43 100%);
+  }
+  
+  .bitcoin-gradient-text {
+    @apply text-transparent bg-clip-text;
+    background: linear-gradient(135deg, #f7931a 0%, #ff9f43 100%);
+  }
+  
+  .animate-fade-in {
+    animation: fadeIn 0.5s ease-out forwards;
+  }
+  
+  .animate-slide-up {
+    animation: slideUp 0.5s ease-out forwards;
+  }
+  
+  .animate-pulse-subtle {
+    animation: pulseSlow 2s infinite;
+  }
 }
 
 @layer utilities {
@@ -119,5 +152,34 @@
   
   .text-gradient {
     @apply bg-gradient-to-r from-bitcoin-light to-bitcoin bg-clip-text text-transparent;
+  }
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+@keyframes slideUp {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes pulseSlow {
+  0%, 100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.6;
   }
 }

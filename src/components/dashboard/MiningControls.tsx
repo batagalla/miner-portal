@@ -1,8 +1,7 @@
-
 import { useState, useEffect } from "react";
 import { useToast } from "@/components/ui/use-toast";
 import { Switch } from "@/components/ui/switch";
-import { InfoCircle, Zap } from "lucide-react";
+import { HelpCircle, Zap } from "lucide-react";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 
 interface MiningControlsProps {
@@ -16,9 +15,7 @@ const MiningControls = ({ onMiningSpeedChange, onMiningToggle }: MiningControlsP
   const [isBoostActive, setIsBoostActive] = useState(false);
   const { toast } = useToast();
 
-  // Initialize mining on component mount
   useEffect(() => {
-    // Call the prop functions with initial values
     onMiningSpeedChange(miningSpeed);
     onMiningToggle(isMining);
   }, []);
@@ -28,7 +25,6 @@ const MiningControls = ({ onMiningSpeedChange, onMiningToggle }: MiningControlsP
     setMiningSpeed(newSpeed);
     onMiningSpeedChange(newSpeed);
     
-    // Show toast for significant mining speed changes
     if (newSpeed === 100) {
       toast({
         title: "Maximum mining speed",
@@ -99,7 +95,7 @@ const MiningControls = ({ onMiningSpeedChange, onMiningToggle }: MiningControlsP
                     <Zap className="h-3 w-3 text-white" />
                   </div>
                   <span className="text-sm font-medium text-binance-text">Cloud Boost X10</span>
-                  <InfoCircle className="h-4 w-4 text-binance-text/60" />
+                  <HelpCircle className="h-4 w-4 text-binance-text/60" />
                 </div>
               </TooltipTrigger>
               <TooltipContent>
