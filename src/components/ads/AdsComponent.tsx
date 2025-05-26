@@ -1,6 +1,5 @@
 
 import { useEffect, useRef } from "react";
-import { useIsMobile } from "@/hooks/use-mobile";
 
 interface AdsProps {
   adUnit: string;
@@ -10,24 +9,6 @@ interface AdsProps {
 
 const AdsComponent = ({ adUnit, size = "horizontal", className = "" }: AdsProps) => {
   const adRef = useRef<HTMLDivElement>(null);
-  const isMobile = useIsMobile();
-  
-  // Convert size prop to actual dimensions
-  const getAdSize = () => {
-    // Override size based on mobile if needed
-    const effectiveSize = isMobile && size === "horizontal" ? "square" : size;
-    
-    switch (effectiveSize) {
-      case "horizontal":
-        return { width: 728, height: 90 };
-      case "vertical":
-        return { width: 160, height: 600 };
-      case "square":
-        return { width: 300, height: 250 };
-      default:
-        return { width: 728, height: 90 };
-    }
-  };
   
   useEffect(() => {
     // Clean up any existing ad
@@ -39,8 +20,25 @@ const AdsComponent = ({ adUnit, size = "horizontal", className = "" }: AdsProps)
       script.async = true;
       script.type = "application/javascript";
       
-      // Get the appropriate ad size
-      const { width, height } = getAdSize();
+      // Set the appropriate ad size
+      let width, height;
+      switch (size) {
+        case "horizontal":
+          width = 728;
+          height = 90;
+          break;
+        case "vertical":
+          width = 160;
+          height = 600;
+          break;
+        case "square":
+          width = 300;
+          height = 250;
+          break;
+        default:
+          width = 728;
+          height = 90;
+      }
       
       // Set the script source with the appropriate parameters
       script.src = `https://ad.a-ads.com/${adUnit}?size=${width}x${height}`;
@@ -55,17 +53,15 @@ const AdsComponent = ({ adUnit, size = "horizontal", className = "" }: AdsProps)
         adRef.current.innerHTML = "";
       }
     };
-  }, [adUnit, size, isMobile]);
-  
-  const { width, height } = getAdSize();
+  }, [adUnit, size]);
   
   return (
     <div 
       ref={adRef} 
-      className={`ad-container mx-auto my-2 md:my-4 overflow-hidden bg-binance-darker border border-binance-light/10 rounded-lg ${className}`}
+      className={`ad-container mx-auto my-4 overflow-hidden ${className}`}
       style={{ 
-        minHeight: `${height}px`,
-        minWidth: isMobile ? "auto" : `${width}px`,
+        minHeight: size === "horizontal" ? "90px" : size === "vertical" ? "600px" : "250px",
+        minWidth: size === "horizontal" ? "728px" : size === "vertical" ? "160px" : "300px",
         maxWidth: "100%"
       }}
     />

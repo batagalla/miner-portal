@@ -16,8 +16,6 @@ app.use(cors());
 
 // Define Routes
 app.use('/api/auth', require('./api/auth'));
-app.use('/api/users', require('./api/users'));
-app.use('/api/transactions', require('./api/transactions'));
 app.use('/api/admin', require('./api/admin'));
 app.use('/api/affiliate', require('./api/affiliate'));
 app.use('/api/payouts', require('./api/payouts'));
