@@ -1,4 +1,3 @@
-
 const jwt = require('jsonwebtoken');
 
 module.exports = function(req, res, next) {
@@ -14,7 +13,12 @@ module.exports = function(req, res, next) {
   try {
     const decoded = jwt.verify(token, process.env.JWT_SECRET);
     
-    req.user = decoded.user;
+    // Check if it's an admin token
+    if (!decoded.admin) {
+      return res.status(403).json({ msg: 'Not authorized as admin' });
+    }
+    
+    req.admin = decoded.admin;
     next();
   } catch (err) {
     res.status(401).json({ msg: 'Token is not valid' });
