@@ -2,6 +2,7 @@
 import Navbar from "../components/layout/Navbar";
 import Footer from "../components/layout/Footer";
 import FaqList from "../components/faq/FaqList";
+import AdsComponent from "../components/ads/AdsComponent";
 import { HelpCircle } from "lucide-react";
 
 const Faq = () => {
@@ -23,6 +24,12 @@ const Faq = () => {
         
         <div className="glass-card p-6 max-w-5xl mx-auto">
           <FaqList />
+        </div>
+
+        {/* Ad placement after FAQ */}
+        <div className="mt-8 flex justify-center">
+          <AdsComponent adUnit="123467" size="horizontal" className="hidden md:block" />
+          <AdsComponent adUnit="123468" size="square" className="md:hidden" />
         </div>
       </main>
       

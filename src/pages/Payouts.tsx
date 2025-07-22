@@ -4,6 +4,7 @@ import { Navigate } from "react-router-dom";
 import { AuthContext } from "../App";
 import Navbar from "../components/layout/Navbar";
 import Footer from "../components/layout/Footer";
+import AdsComponent from "../components/ads/AdsComponent";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -373,6 +374,12 @@ const Payouts = () => {
             </Card>
           </TabsContent>
         </Tabs>
+
+        {/* Ad placement before FAQ */}
+        <div className="mb-8 flex justify-center">
+          <AdsComponent adUnit="123475" size="horizontal" className="hidden md:block" />
+          <AdsComponent adUnit="123476" size="square" className="md:hidden" />
+        </div>
         
         <div className="glass-card p-6">
           <h2 className="text-xl font-bold mb-6">Frequently Asked Questions</h2>

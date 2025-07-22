@@ -7,6 +7,7 @@ import Footer from "../components/layout/Footer";
 import { Copy, Share2, Users, Award, Gift } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useToast } from "@/components/ui/use-toast";
+import AdsComponent from "../components/ads/AdsComponent";
 import {
   Table,
   TableBody,
@@ -158,6 +159,12 @@ const AffiliateProgram = () => {
             </div>
           </div>
         </div>
+
+        {/* Ad placement after rewards section */}
+        <div className="mb-8 flex justify-center">
+          <AdsComponent adUnit="123469" size="horizontal" className="hidden md:block" />
+          <AdsComponent adUnit="123470" size="square" className="md:hidden" />
+        </div>
         
         <div className="glass-card p-6 mb-8">
           <h2 className="text-xl font-bold mb-6">Recent Referrals</h2>
@@ -221,6 +228,12 @@ const AffiliateProgram = () => {
               </div>
             </div>
           </div>
+        </div>
+
+        {/* Ad placement before FAQ section */}
+        <div className="mb-8 flex justify-center">
+          <AdsComponent adUnit="123471" size="horizontal" className="hidden md:block" />
+          <AdsComponent adUnit="123472" size="square" className="md:hidden" />
         </div>
         
         <div className="bg-binance-darker border border-binance-light/10 rounded-lg p-6">

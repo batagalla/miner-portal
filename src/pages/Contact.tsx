@@ -22,6 +22,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { Mail, MessageSquare, Phone, MapPin, Send, Check, Loader2 } from "lucide-react";
+import AdsComponent from "../components/ads/AdsComponent";
 
 const Contact = () => {
   const { toast } = useToast();
@@ -289,6 +290,12 @@ const Contact = () => {
               </CardContent>
             </Card>
           </div>
+        </div>
+
+        {/* Ad placement before community section */}
+        <div className="mt-8 mb-8 flex justify-center">
+          <AdsComponent adUnit="123465" size="horizontal" className="hidden md:block" />
+          <AdsComponent adUnit="123466" size="square" className="md:hidden" />
         </div>
         
         <div className="mt-12 glass-card p-8 text-center">

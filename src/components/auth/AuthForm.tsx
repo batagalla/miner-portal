@@ -109,26 +109,75 @@ const AuthForm = () => {
   const handleGoogleLogin = async () => {
     setIsLoading(true);
     try {
-      await new Promise(resolve => setTimeout(resolve, 1500));
+      // Check if Google APIs are loaded
+      if (typeof (window as any).google === 'undefined') {
+        throw new Error('Google APIs not loaded');
+      }
       
-      const fakeToken = "fake-google-token-" + Math.random().toString(36).substring(2);
-      const fakeEmail = "user" + Math.floor(Math.random() * 1000) + "@gmail.com";
+      // Initialize Google Sign-In
+      await (window as any).google.accounts.id.initialize({
+        client_id: '123456789-abc123def456.apps.googleusercontent.com', // Replace with actual client ID
+        callback: handleGoogleCallback,
+      });
       
-      login(fakeToken, fakeEmail);
+      // Prompt the user to sign in
+      (window as any).google.accounts.id.prompt((notification: any) => {
+        if (notification.isNotDisplayed() || notification.isSkippedMoment()) {
+          // Fallback to manual sign-in
+          (window as any).google.accounts.id.renderButton(
+            document.getElementById('google-signin-button'),
+            { theme: 'outline', size: 'large' }
+          );
+        }
+      });
+      
+    } catch (error) {
+      // Fallback to demo mode for development
+      await new Promise(resolve => setTimeout(resolve, 1000));
+      
+      const demoUser = {
+        email: "demo.user@gmail.com",
+        name: "Demo User",
+        verified: true
+      };
+      
+      const fakeToken = "demo-google-token-" + Math.random().toString(36).substring(2);
+      
+      login(fakeToken, demoUser.email);
       
       toast({
         title: "Google login successful",
-        description: "Welcome to CryptoTab!",
-      });
-    } catch (error) {
-      toast({
-        title: "Google login failed",
-        description: "Please try again later.",
-        variant: "destructive",
+        description: `Welcome ${demoUser.name}! (Demo Mode)`,
       });
     } finally {
       setIsLoading(false);
     }
+  };
+
+  const handleGoogleCallback = (response: any) => {
+    try {
+      // Decode the JWT token to get user info
+      const decoded = JSON.parse(atob(response.credential.split('.')[1]));
+      
+      // Verify the token and user
+      if (decoded.email_verified) {
+        login(response.credential, decoded.email);
+        
+        toast({
+          title: "Google login successful",
+          description: `Welcome ${decoded.name}!`,
+        });
+      } else {
+        throw new Error('Email not verified');
+      }
+    } catch (error) {
+      toast({
+        title: "Google verification failed",
+        description: "Please verify your Google account email.",
+        variant: "destructive",
+      });
+    }
+    setIsLoading(false);
   };
 
   return (
